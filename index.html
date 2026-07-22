@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Phrase Detective - Definitivo</title>
+
+<style>
+  body {
+    background: #1b1f2b;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+  }
+
+  /* ★★★ TABELLA PER CONTENERE LA FRASE ★★★ */
+  #layout-table {
+    margin: 0 auto;
+    border-collapse: collapse;
+  }
+
+  /* ★★★ QUI CAMBI IL NUMERO (666) PER LA LARGHEZZA ★★★ */
+  #layout-table td {
+    width: 995px;
+  }
+
+  #grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 20px;
+  }
+
+  .cell {
+    width: 40px;
+    height: 40px;
+    background: #333;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: outline 0.1s, background 0.2s;
+  }
+
+  .selected {
+    outline: 2px solid #facc15;
+  }
+
+  #controls {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  button {
+    background: #3b82f6;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  #message {
+    margin-top: 20px;
+    font-size: 18px;
+  }
+
+  #legend {
+    margin-top: 30px;
+    font-size: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+  }
+</style>
+
+</head>
+<body>
+
+<h1>Phrase Detective</h1>
+
+<!-- ★★★ TABELLA INSERITA QUI ★★★ -->
+<table id="layout-table">
+  <tr>
+    <td>
+      <div id="grid"></div>
+    </td>
+  </tr>
+</table>
+
+<div id="controls">
+  <button id="btn-reset">Reset</button>
+  <button id="btn-shuffle">Rimescola</button>
+  <button id="btn-reveal">Rivela lettera</button>
+</div>
+
+<div id="message"></div>
+
+<div id="legend">
+  <div class="legend-item">
+    <div class="legend-color" style="background:#2b7a3f;"></div> Corretta
+  </div>
+  <div class="legend-item">
+    <div class="legend-color" style="background:#c9a92c;"></div> Vicinissima
+  </div>
+  <div class="legend-item">
+    <div class="legend-color" style="background:#c97a2c;"></div> Vicina
+  </div>
+  <div class="legend-item">
+    <div class="legend-color" style="background:#a83232;"></div> Lontana 
+  </div>
+  <div class="legend-item">
+    <div class="legend-color" style="background:#5a3b1e;"></div> Lontanissima
+  </div>
+</div>
+
+<script>
+  const phraseOriginal = "Non c'è cosa più divina che giocare con Yasmina";
+
+  const phraseNoSpaces = Array.from(phraseOriginal.replace(/ /g, ""));
+  const wordLengths = phraseOriginal.split(" ").map(w => Array.from(w).length);
+  let letters = Array.from(phraseNoSpaces);
+
+  let selectedIndex = null;
+
+  const grid = document.getElementById("grid");
+  const message = document.getElementById("message");
+
+  function shuffle() {
+    letters = letters
+      .map(v => ({ v, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(o => o.v);
+  }
+
+  shuffle();
+
+  function distanceColor(index) {
+    const correctLetter = phraseNoSpaces[index];
+    if (letters[index] === correctLetter) return "#2b7a3f";
+
+    const positions = [];
+    for (let i = 0; i < phraseNoSpaces.length; i++) {
+      if (phraseNoSpaces[i] === letters[index]) positions.push(i);
+    }
+
+    if (positions.length === 0) return "#5a3b1e";
+
+    let min = Infinity;
+    for (const p of positions) {
+      const d = Math.abs(index - p);
+      if (d < min) min = d;
+    }
+
+    if (min <= 3) return "#c9a92c";
+    if (min <= 6) return "#c97a2c";
+    if (min <= 12) return "#a83232";
+    return "#5a3b1e";
+  }
+
+  function render() {
+    grid.innerHTML = "";
+
+    let nextWordEnd = wordLengths[0];
+    let wordIndex = 1;
+
+    letters.forEach((letter, i) => {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.textContent = letter;
+      cell.style.background = distanceColor(i);
+
+      if (selectedIndex === i) {
+        cell.classList.add("selected");
+      }
+
+      if (i + 1 === nextWordEnd) {
+        cell.style.marginRight = "20px";
+        nextWordEnd += wordLengths[wordIndex++] || 0;
+      }
+
+      cell.addEventListener("click", () => {
+        if (selectedIndex === null) {
+          selectedIndex = i;
+        } else if (selectedIndex === i) {
+          selectedIndex = null;
+        } else {
+          [letters[selectedIndex], letters[i]] =
+            [letters[i], letters[selectedIndex]];
+          selectedIndex = null;
+          checkWin();
+        }
+        render();
+      });
+
+      grid.appendChild(cell);
+    });
+  }
+
+  function checkWin() {
+    if (letters.join("") === phraseNoSpaces.join("")) {
+      message.textContent = "🎉 Frase completata!";
+    } else {
+      message.textContent = "";
+    }
+  }
+
+  document.getElementById("btn-reset").onclick = () => {
+    letters = Array.from(phraseNoSpaces);
+    shuffle();
+    selectedIndex = null;
+    render();
+  };
+
+  document.getElementById("btn-shuffle").onclick = () => {
+    shuffle();
+    selectedIndex = null;
+    render();
+  };
+
+  document.getElementById("btn-reveal").onclick = () => {
+    const wrong = letters
+      .map((l, i) => (l !== phraseNoSpaces[i] ? i : null))
+      .filter(i => i !== null);
+
+    if (wrong.length === 0) return;
+
+    const idx = wrong[Math.floor(Math.random() * wrong.length)];
+    letters[idx] = phraseNoSpaces[idx];
+
+    selectedIndex = null;
+    render();
+    checkWin();
+  };
+
+  render();
+</script>
+
+</body>
+</html>
