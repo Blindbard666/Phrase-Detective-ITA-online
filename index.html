@@ -13,13 +13,11 @@
     padding: 20px;
   }
 
-  /* ★★★ TABELLA PER CONTENERE LA FRASE ★★★ */
   #layout-table {
     margin: 0 auto;
     border-collapse: collapse;
   }
 
-  /* ★★★ QUI CAMBI IL NUMERO (666) PER LA LARGHEZZA ★★★ */
   #layout-table td {
     width: 995px;
   }
@@ -98,7 +96,6 @@
 
 <h1>Phrase Detective</h1>
 
-<!-- ★★★ TABELLA INSERITA QUI ★★★ -->
 <table id="layout-table">
   <tr>
     <td>
@@ -108,9 +105,7 @@
 </table>
 
 <div id="controls">
-  <button id="btn-reset">Reset</button>
   <button id="btn-shuffle">Rimescola</button>
-  <button id="btn-reveal">Rivela lettera</button>
 </div>
 
 <div id="message"></div>
@@ -136,32 +131,68 @@
 <script>
   const phraseOriginal = "Non c'è cosa più divina che giocare con Yasmina";
 
-  const phraseNoSpaces = Array.from(phraseOriginal.replace(/ /g, ""));
-  const wordLengths = phraseOriginal.split(" ").map(w => Array.from(w).length);
-  let letters = Array.from(phraseNoSpaces);
+  const phraseNoSpaces = Array.from(phraseOriginal.replace(/ /g, "")).map((ch, i) => ({
+    char: ch,
+    id: i
+  }));
 
+  const wordLengths = phraseOriginal.split(" ").map(w => Array.from(w).length);
+
+  let letters = phraseNoSpaces.map(obj => ({ ...obj }));
   let selectedIndex = null;
 
   const grid = document.getElementById("grid");
   const message = document.getElementById("message");
 
+  // ★★★ SHUFFLE INIZIALE: nessuna lettera deve essere corretta ★★★
+  function initialShuffle() {
+    let ok = false;
+
+    while (!ok) {
+      // mescola tutto
+      let shuffled = letters
+        .map(v => ({ v, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(o => o.v);
+
+      // controlla se almeno una lettera è corretta
+      const anyCorrect = shuffled.some((obj, i) => obj.id === phraseNoSpaces[i].id);
+
+      if (!anyCorrect) {
+        letters = shuffled;
+        ok = true;
+      }
+    }
+  }
+
+  // ★★★ SHUFFLE DURANTE IL GIOCO: solo le sbagliate ★★★
   function shuffle() {
-    letters = letters
+    const wrong = letters.filter((obj, i) => obj.id !== phraseNoSpaces[i].id);
+
+    const shuffled = wrong
       .map(v => ({ v, sort: Math.random() }))
       .sort((a, b) => a.sort - b.sort)
       .map(o => o.v);
+
+    let idx = 0;
+    letters = letters.map((obj, i) => {
+      if (obj.id === phraseNoSpaces[i].id) return obj;
+      return shuffled[idx++];
+    });
+
+    render();
   }
 
-  shuffle();
+  initialShuffle();
 
   function distanceColor(index) {
-    const correctLetter = phraseNoSpaces[index];
-    if (letters[index] === correctLetter) return "#2b7a3f";
+    const correctObj = phraseNoSpaces[index];
 
-    const positions = [];
-    for (let i = 0; i < phraseNoSpaces.length; i++) {
-      if (phraseNoSpaces[i] === letters[index]) positions.push(i);
-    }
+    if (letters[index].id === correctObj.id) return "#2b7a3f";
+
+    const positions = phraseNoSpaces
+      .map((obj, i) => obj.id === letters[index].id ? i : null)
+      .filter(i => i !== null);
 
     if (positions.length === 0) return "#5a3b1e";
 
@@ -183,10 +214,10 @@
     let nextWordEnd = wordLengths[0];
     let wordIndex = 1;
 
-    letters.forEach((letter, i) => {
+    letters.forEach((obj, i) => {
       const cell = document.createElement("div");
       cell.className = "cell";
-      cell.textContent = letter;
+      cell.textContent = obj.char;
       cell.style.background = distanceColor(i);
 
       if (selectedIndex === i) {
@@ -204,8 +235,10 @@
         } else if (selectedIndex === i) {
           selectedIndex = null;
         } else {
-          [letters[selectedIndex], letters[i]] =
-            [letters[i], letters[selectedIndex]];
+          const temp = letters[selectedIndex];
+          letters[selectedIndex] = letters[i];
+          letters[i] = temp;
+
           selectedIndex = null;
           checkWin();
         }
@@ -217,39 +250,20 @@
   }
 
   function checkWin() {
-    if (letters.join("") === phraseNoSpaces.join("")) {
+    const correct = phraseNoSpaces.map(o => o.id);
+    const current = letters.map(o => o.id);
+
+    if (correct.join("") === current.join("")) {
       message.textContent = "🎉 Frase completata!";
     } else {
       message.textContent = "";
     }
   }
 
-  document.getElementById("btn-reset").onclick = () => {
-    letters = Array.from(phraseNoSpaces);
-    shuffle();
-    selectedIndex = null;
-    render();
-  };
-
   document.getElementById("btn-shuffle").onclick = () => {
     shuffle();
     selectedIndex = null;
     render();
-  };
-
-  document.getElementById("btn-reveal").onclick = () => {
-    const wrong = letters
-      .map((l, i) => (l !== phraseNoSpaces[i] ? i : null))
-      .filter(i => i !== null);
-
-    if (wrong.length === 0) return;
-
-    const idx = wrong[Math.floor(Math.random() * wrong.length)];
-    letters[idx] = phraseNoSpaces[idx];
-
-    selectedIndex = null;
-    render();
-    checkWin();
   };
 
   render();
