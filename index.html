@@ -24,18 +24,20 @@
 }
 
 #grid {
-    width: 100%;      /* fondamentale */
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 20px;
+    width:100%;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:20px;
+    margin-top:20px;
+    align-items:center;
 }
+.word{display:flex;flex-wrap:nowrap;gap:6px;align-items:center;}
 
 
   .cell {
-    width: 52px;
-    height: 52px;
+    width: 60px;
+    height: 60px;
     background: #333;
     border-radius: 6px;
     display: flex;
@@ -52,11 +54,11 @@
   }
 
   /* ★★★ SEPARATORE CELESTINO ★★★ */
-.separator {
+.separator_unused {
     font-size: 46px;          
     color: #4fc3f7;           /* celestino brillante */
     margin: 0 25px;           
-    line-height: 52px;        
+    line-height: 60px;        
     user-select: none;        
     pointer-events: none;     
     font-weight: bold;        
@@ -224,59 +226,30 @@
 
   function render() {
     grid.innerHTML = "";
-
-    let nextWordEnd = wordLengths[0];
-    let wordIndex = 1;
-
-    letters.forEach((obj, i) => {
-
-      /* ★★★ SEPARATORE TRA PAROLE ★★★ */
-      if (i === nextWordEnd - wordLengths[wordIndex - 1] && i !== 0) {
-        const sep = document.createElement("div");
-        sep.className = "separator";
-        sep.textContent = "•";
-        grid.appendChild(sep);
+    let pos=0;
+    wordLengths.forEach((len,widx)=>{
+      const word=document.createElement("div");
+      word.className="word";
+      for(let j=0;j<len;j++,pos++){
+        const i=pos,obj=letters[i];
+        const cell=document.createElement("div");
+        cell.className="cell";
+        cell.textContent=obj.char;
+        cell.style.background=distanceColor(i);
+        if(obj.id===phraseNoSpaces[i].id){cell.style.pointerEvents="none";cell.style.color="#fff";}
+        if(selectedIndex===i)cell.classList.add("selected");
+        cell.addEventListener("click",()=>{
+          if(selectedIndex===null)selectedIndex=i;
+          else if(selectedIndex===i)selectedIndex=null;
+          else{[letters[selectedIndex],letters[i]]=[letters[i],letters[selectedIndex]];selectedIndex=null;checkWin();}
+          render();
+        });
+        word.appendChild(cell);
       }
-
-      const cell = document.createElement("div");
-      cell.className = "cell";
-      cell.textContent = obj.char;
-      cell.style.background = distanceColor(i);
-
-      if (letters[i].id === phraseNoSpaces[i].id) {
-        cell.style.pointerEvents = "none";
-        cell.style.color = "#fff";
-      }
-
-      if (selectedIndex === i) {
-        cell.classList.add("selected");
-      }
-
-      if (i + 1 === nextWordEnd) {
-        nextWordEnd += wordLengths[wordIndex++] || 0;
-      }
-
-      cell.addEventListener("click", () => {
-        if (selectedIndex === null) {
-          selectedIndex = i;
-        } else if (selectedIndex === i) {
-          selectedIndex = null;
-        } else {
-          const temp = letters[selectedIndex];
-          letters[selectedIndex] = letters[i];
-          letters[i] = temp;
-
-          selectedIndex = null;
-          checkWin();
-        }
-        render();
-      });
-
-      grid.appendChild(cell);
+      grid.appendChild(word);
     });
-  }
-
-  function checkWin() {
+}
+function checkWin() {
     const correct = phraseNoSpaces.map(o => o.id);
     const current = letters.map(o => o.id);
 
