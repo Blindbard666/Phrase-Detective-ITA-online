@@ -19,7 +19,8 @@
   }
 
   #layout-table td {
-    width: 995px;
+    width: 90%;
+    margin: 0 auto;
   }
 
   #grid {
@@ -30,15 +31,16 @@
     margin-top: 20px;
   }
 
+  /* ★★★ LETTERE PIÙ GRANDI ★★★ */
   .cell {
-    width: 40px;
-    height: 40px;
+    width: 52px;
+    height: 52px;
     background: #333;
     border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 30px;
     font-weight: bold;
     cursor: pointer;
     transition: outline 0.1s, background 0.2s;
@@ -144,18 +146,16 @@
   const grid = document.getElementById("grid");
   const message = document.getElementById("message");
 
-  // ★★★ SHUFFLE INIZIALE: nessuna lettera deve essere corretta ★★★
+  /* ★★★ SHUFFLE INIZIALE: nessuna lettera deve essere corretta ★★★ */
   function initialShuffle() {
     let ok = false;
 
     while (!ok) {
-      // mescola tutto
       let shuffled = letters
         .map(v => ({ v, sort: Math.random() }))
         .sort((a, b) => a.sort - b.sort)
         .map(o => o.v);
 
-      // controlla se almeno una lettera è corretta
       const anyCorrect = shuffled.some((obj, i) => obj.id === phraseNoSpaces[i].id);
 
       if (!anyCorrect) {
@@ -165,7 +165,7 @@
     }
   }
 
-  // ★★★ SHUFFLE DURANTE IL GIOCO: solo le sbagliate ★★★
+  /* ★★★ SHUFFLE DURANTE IL GIOCO: solo le sbagliate ★★★ */
   function shuffle() {
     const wrong = letters.filter((obj, i) => obj.id !== phraseNoSpaces[i].id);
 
@@ -188,7 +188,8 @@
   function distanceColor(index) {
     const correctObj = phraseNoSpaces[index];
 
-    if (letters[index].id === correctObj.id) return "#2b7a3f";
+    if (letters[index].id === correctObj.id) return "#00c853";
+
 
     const positions = phraseNoSpaces
       .map((obj, i) => obj.id === letters[index].id ? i : null)
@@ -208,6 +209,7 @@
     return "#5a3b1e";
   }
 
+  /* ★★★ RENDER SEMPLICE (clic perfetto) ★★★ */
   function render() {
     grid.innerHTML = "";
 
@@ -219,6 +221,13 @@
       cell.className = "cell";
       cell.textContent = obj.char;
       cell.style.background = distanceColor(i);
+
+      /* ★★★ BLOCCO LE LETTERE CORRETTE ★★★ */
+      if (letters[i].id === phraseNoSpaces[i].id) {
+        cell.style.pointerEvents = "none";   // non cliccabile
+    	cell.style.opacity = "1";            // niente effetto spento
+    	cell.style.color = "#fff";           // ★ testo bianco brillante
+      }
 
       if (selectedIndex === i) {
         cell.classList.add("selected");
