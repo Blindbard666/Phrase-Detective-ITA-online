@@ -13,23 +13,25 @@
     padding: 20px;
   }
 
-  #layout-table {
+#layout-table {
     margin: 0 auto;
     border-collapse: collapse;
-  }
+}
 
-  #layout-table td {
-    width: 90%;
-    margin: 0 auto;
-  }
+#layout-table td {
+    width: 59vw;      /* 60% della finestra */
+    margin: 0 auto;   /* centrato */
+}
 
-  #grid {
+#grid {
+    width: 100%;      /* fondamentale */
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 6px;
     margin-top: 20px;
-  }
+}
+
 
   .cell {
     width: 52px;
@@ -53,7 +55,7 @@
 .separator {
     font-size: 46px;          
     color: #4fc3f7;           /* celestino brillante */
-    margin: 0 22px;           
+    margin: 0 25px;           
     line-height: 52px;        
     user-select: none;        
     pointer-events: none;     
