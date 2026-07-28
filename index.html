@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Phrase Detective - Stabile</title>
+<title>Phrase Detective Italiano</title>
 
 <style>
   body {
@@ -27,7 +27,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-     white-space: normal; 
+    gap: 6px;
     margin-top: 20px;
   }
 
@@ -43,13 +43,26 @@
     font-weight: bold;
     cursor: pointer;
     transition: outline 0.1s, background 0.2s;
-    color: #eee;
-margin: 3px;   /* ← separazione tra lettere */
   }
 
   .selected {
     outline: 2px solid #facc15;
   }
+
+  /* ★★★ SEPARATORE CELESTINO ★★★ */
+.separator {
+    font-size: 46px;          
+    color: #4fc3f7;           /* celestino brillante */
+    margin: 0 22px;           
+    line-height: 52px;        
+    user-select: none;        
+    pointer-events: none;     
+    font-weight: bold;        
+    text-shadow:
+        0 0 6px #ffffff,      /* bagliore bianco morbido */
+        0 0 12px #ffffff;     /* bagliore bianco più largo */
+}
+
 
   #controls {
     margin-top: 20px;
@@ -115,7 +128,7 @@ margin: 3px;   /* ← separazione tra lettere */
 
 <div id="legend">
   <div class="legend-item">
-    <div class="legend-color" style="background:#00c853;"></div> Corretta
+    <div class="legend-color" style="background:#2b7a3f;"></div> Corretta
   </div>
   <div class="legend-item">
     <div class="legend-color" style="background:#c9a92c;"></div> Vicinissima
@@ -214,6 +227,15 @@ margin: 3px;   /* ← separazione tra lettere */
     let wordIndex = 1;
 
     letters.forEach((obj, i) => {
+
+      /* ★★★ SEPARATORE TRA PAROLE ★★★ */
+      if (i === nextWordEnd - wordLengths[wordIndex - 1] && i !== 0) {
+        const sep = document.createElement("div");
+        sep.className = "separator";
+        sep.textContent = "•";
+        grid.appendChild(sep);
+      }
+
       const cell = document.createElement("div");
       cell.className = "cell";
       cell.textContent = obj.char;
@@ -229,7 +251,6 @@ margin: 3px;   /* ← separazione tra lettere */
       }
 
       if (i + 1 === nextWordEnd) {
-        cell.style.marginRight = "20px";
         nextWordEnd += wordLengths[wordIndex++] || 0;
       }
 
@@ -275,4 +296,3 @@ margin: 3px;   /* ← separazione tra lettere */
 
 </body>
 </html>
-
