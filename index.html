@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Phrase Detective Italiano</title>
+<title>Phrase Detective - Stabile</title>
 
 <style>
   body {
@@ -27,11 +27,10 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 6px;
+     white-space: normal; 
     margin-top: 20px;
   }
 
-  /* ★★★ LETTERE PIÙ GRANDI ★★★ */
   .cell {
     width: 52px;
     height: 52px;
@@ -44,6 +43,8 @@
     font-weight: bold;
     cursor: pointer;
     transition: outline 0.1s, background 0.2s;
+    color: #eee;
+margin: 3px;   /* ← separazione tra lettere */
   }
 
   .selected {
@@ -114,7 +115,7 @@
 
 <div id="legend">
   <div class="legend-item">
-    <div class="legend-color" style="background:#2b7a3f;"></div> Corretta
+    <div class="legend-color" style="background:#00c853;"></div> Corretta
   </div>
   <div class="legend-item">
     <div class="legend-color" style="background:#c9a92c;"></div> Vicinissima
@@ -146,7 +147,6 @@
   const grid = document.getElementById("grid");
   const message = document.getElementById("message");
 
-  /* ★★★ SHUFFLE INIZIALE: nessuna lettera deve essere corretta ★★★ */
   function initialShuffle() {
     let ok = false;
 
@@ -165,7 +165,6 @@
     }
   }
 
-  /* ★★★ SHUFFLE DURANTE IL GIOCO: solo le sbagliate ★★★ */
   function shuffle() {
     const wrong = letters.filter((obj, i) => obj.id !== phraseNoSpaces[i].id);
 
@@ -190,7 +189,6 @@
 
     if (letters[index].id === correctObj.id) return "#00c853";
 
-
     const positions = phraseNoSpaces
       .map((obj, i) => obj.id === letters[index].id ? i : null)
       .filter(i => i !== null);
@@ -209,7 +207,6 @@
     return "#5a3b1e";
   }
 
-  /* ★★★ RENDER SEMPLICE (clic perfetto) ★★★ */
   function render() {
     grid.innerHTML = "";
 
@@ -222,11 +219,9 @@
       cell.textContent = obj.char;
       cell.style.background = distanceColor(i);
 
-      /* ★★★ BLOCCO LE LETTERE CORRETTE ★★★ */
       if (letters[i].id === phraseNoSpaces[i].id) {
-        cell.style.pointerEvents = "none";   // non cliccabile
-    	cell.style.opacity = "1";            // niente effetto spento
-    	cell.style.color = "#fff";           // ★ testo bianco brillante
+        cell.style.pointerEvents = "none";
+        cell.style.color = "#fff";
       }
 
       if (selectedIndex === i) {
@@ -280,3 +275,4 @@
 
 </body>
 </html>
+
