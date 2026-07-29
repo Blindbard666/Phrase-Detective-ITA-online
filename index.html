@@ -1,273 +1,83 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<title>Phrase Detective Italiano</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phrase Detective Italiano</title>
 
-<style>
-  body {
-    background: #1b1f2b;
-    color: #eee;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-  }
-
-#layout-table {
-    margin: 0 auto;
-    border-collapse: collapse;
-}
-
-#layout-table td {
-    width: 59vw;      /* 60% della finestra */
-    margin: 0 auto;   /* centrato */
-}
-
-#grid {
-    width:100%;
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:20px;
-    margin-top:20px;
-    align-items:center;
-}
-.word{display:flex;flex-wrap:nowrap;gap:6px;align-items:center;}
-
-
-  .cell {
-    width: 60px;
-    height: 60px;
-    background: #333;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: outline 0.1s, background 0.2s;
-  }
-
-  .selected {
-    outline: 2px solid #facc15;
-  }
-
-  /* ★★★ SEPARATORE CELESTINO ★★★ */
-.separator_unused {
-    font-size: 46px;          
-    color: #4fc3f7;           /* celestino brillante */
-    margin: 0 25px;           
-    line-height: 60px;        
-    user-select: none;        
-    pointer-events: none;     
-    font-weight: bold;        
-    text-shadow:
-        0 0 6px #ffffff,      /* bagliore bianco morbido */
-        0 0 12px #ffffff;     /* bagliore bianco più largo */
-}
-
-
-  #controls {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  button {
-    background: #3b82f6;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
-    color: #fff;
-    font-weight: bold;
-    cursor: pointer;
-  }
-
-  #message {
-    margin-top: 20px;
-    font-size: 18px;
-  }
-
-  #legend {
-    margin-top: 30px;
-    font-size: 15px;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .legend-color {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-  }
-</style>
-
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<h1>Phrase Detective</h1>
+    <h1>Phrase Detective</h1>
 
-<table id="layout-table">
-  <tr>
-    <td>
-      <div id="grid"></div>
-    </td>
-  </tr>
-</table>
+    <table id="layout-table">
+        <tr>
+            <td>
+                <div id="grid"></div>
+            </td>
+        </tr>
+    </table>
 
-<div id="controls">
-  <button id="btn-shuffle">Rimescola</button>
-</div>
+    <div id="controls">
 
-<div id="message"></div>
+        <button id="btn-shuffle">
+            Rimescola
+        </button>
 
-<div id="legend">
-  <div class="legend-item">
-    <div class="legend-color" style="background:#2b7a3f;"></div> Corretta
-  </div>
-  <div class="legend-item">
-    <div class="legend-color" style="background:#c9a92c;"></div> Vicinissima
-  </div>
-  <div class="legend-item">
-    <div class="legend-color" style="background:#c97a2c;"></div> Vicina
-  </div>
-  <div class="legend-item">
-    <div class="legend-color" style="background:#a83232;"></div> Lontana 
-  </div>
-  <div class="legend-item">
-    <div class="legend-color" style="background:#5a3b1e;"></div> Lontanissima
-  </div>
-</div>
+        <label for="difficulty">
+            Difficoltà
+        </label>
 
-<script>
-  const phraseOriginal = "Non c'è cosa più divina che giocare con Yasmina";
+        <select id="difficulty">
+            <option value="facile">Facile</option>
+            <option value="media">Media</option>
+            <option value="difficile">Difficile</option>
+        </select>
 
-  const phraseNoSpaces = Array.from(phraseOriginal.replace(/ /g, "")).map((ch, i) => ({
-    char: ch,
-    id: i
-  }));
+        <button id="btn-new">
+            Nuova frase
+        </button>
 
-  const wordLengths = phraseOriginal.split(" ").map(w => Array.from(w).length);
+    </div>
 
-  let letters = phraseNoSpaces.map(obj => ({ ...obj }));
-  let selectedIndex = null;
+    <div id="message"></div>
 
-  const grid = document.getElementById("grid");
-  const message = document.getElementById("message");
+    <div id="legend">
 
-  function initialShuffle() {
-    let ok = false;
+        <div class="legend-item">
+            <div class="legend-color correct"></div>
+            Corretta
+        </div>
 
-    while (!ok) {
-      let shuffled = letters
-        .map(v => ({ v, sort: Math.random() }))
-        .sort((a, b) => a.sort - b.sort)
-        .map(o => o.v);
+        <div class="legend-item">
+            <div class="legend-color very-close"></div>
+            Vicinissima
+        </div>
 
-      const anyCorrect = shuffled.some((obj, i) => obj.id === phraseNoSpaces[i].id);
+        <div class="legend-item">
+            <div class="legend-color close"></div>
+            Vicina
+        </div>
 
-      if (!anyCorrect) {
-        letters = shuffled;
-        ok = true;
-      }
-    }
-  }
+        <div class="legend-item">
+            <div class="legend-color far"></div>
+            Lontana
+        </div>
 
-  function shuffle() {
-    const wrong = letters.filter((obj, i) => obj.id !== phraseNoSpaces[i].id);
+        <div class="legend-item">
+            <div class="legend-color very-far"></div>
+            Lontanissima
+        </div>
 
-    const shuffled = wrong
-      .map(v => ({ v, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(o => o.v);
+    </div>
 
-    let idx = 0;
-    letters = letters.map((obj, i) => {
-      if (obj.id === phraseNoSpaces[i].id) return obj;
-      return shuffled[idx++];
-    });
+    <!-- Archivio delle frasi -->
+    <script src="frasi.js"></script>
 
-    render();
-  }
-
-  initialShuffle();
-
-  function distanceColor(index) {
-    const correctObj = phraseNoSpaces[index];
-
-    if (letters[index].id === correctObj.id) return "#00c853";
-
-    const positions = phraseNoSpaces
-      .map((obj, i) => obj.id === letters[index].id ? i : null)
-      .filter(i => i !== null);
-
-    if (positions.length === 0) return "#5a3b1e";
-
-    let min = Infinity;
-    for (const p of positions) {
-      const d = Math.abs(index - p);
-      if (d < min) min = d;
-    }
-
-    if (min <= 3) return "#c9a92c";
-    if (min <= 6) return "#c97a2c";
-    if (min <= 12) return "#a83232";
-    return "#5a3b1e";
-  }
-
-  function render() {
-    grid.innerHTML = "";
-    let pos=0;
-    wordLengths.forEach((len,widx)=>{
-      const word=document.createElement("div");
-      word.className="word";
-      for(let j=0;j<len;j++,pos++){
-        const i=pos,obj=letters[i];
-        const cell=document.createElement("div");
-        cell.className="cell";
-        cell.textContent=obj.char;
-        cell.style.background=distanceColor(i);
-        if(obj.id===phraseNoSpaces[i].id){cell.style.pointerEvents="none";cell.style.color="#fff";}
-        if(selectedIndex===i)cell.classList.add("selected");
-        cell.addEventListener("click",()=>{
-          if(selectedIndex===null)selectedIndex=i;
-          else if(selectedIndex===i)selectedIndex=null;
-          else{[letters[selectedIndex],letters[i]]=[letters[i],letters[selectedIndex]];selectedIndex=null;checkWin();}
-          render();
-        });
-        word.appendChild(cell);
-      }
-      grid.appendChild(word);
-    });
-}
-function checkWin() {
-    const correct = phraseNoSpaces.map(o => o.id);
-    const current = letters.map(o => o.id);
-
-    if (correct.join("") === current.join("")) {
-      message.textContent = "🎉 Frase completata!";
-    } else {
-      message.textContent = "";
-    }
-  }
-
-  document.getElementById("btn-shuffle").onclick = () => {
-    shuffle();
-    selectedIndex = null;
-    render();
-  };
-
-  render();
-</script>
+    <!-- Logica del gioco -->
+    <script src="script.js"></script>
 
 </body>
 </html>
